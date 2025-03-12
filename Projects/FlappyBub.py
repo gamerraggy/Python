@@ -7,6 +7,18 @@ pygame.display.set_caption("SIGMA BIRD") #game window title
 clock = pygame.time.Clock() #handles FPS
 font = pygame.font.Font(None, 36) #font for score
 font2 = pygame.font.Font(None, 72) #larger font
+bg_x1 = 0
+bg_x2 = 800
+xpos = 50
+
+frameWidth = 203
+frameHeight = 152
+frameNum = 0
+ticker = 0
+
+pipe_image = pygame.image.load('sigmapipe.png').convert_alpha()
+background_image = pygame.image.load('bonix.jpeg').convert_alpha()
+birdImg = pygame.image.load('REALBLUB.png.png').convert_alpha()
 
 score = 0 #score variable
 
@@ -31,16 +43,22 @@ class Pipe:
     def __init__(self, x):
         self.x = x
         self.height = random.randint(50, 400)
-        self. gap = 150 #gap size between top and bottom pipes
+        self.gap = 150 #gap size between top and bottom pipes
+        self.top_pipe = pygame.transform.flip(pipe_image, False, True) #flip the pipe image for the top pipe
+        self.bottom_pipe = pipe_image
         
     def move(self):
         self.x -= 2 #moves pipes to the left
         
     def draw(self):
+        #calculate the top and bottom positipons
+        top_height = self.height
+        bottom_height = 800 - (self.height + self.gap)
+        
         #draw the top pipe
-        pygame.draw.rect(screen, (0, 255, 0), (self.x, 0, 50, self.height))
+        screen.blit(self.top_pipe, (self.x, top_height - self.top_pipe.get_height()))
         #draw the bottom pipe
-        pygame.draw.rect(screen, (0, 255, 0), (self.x, self.height + self.gap, 50, 600 - (self.height + self.gap)))
+        screen.blit(self.bottom_pipe, (self.x, self.height + self.gap))
         
 def check_collision(bx, by, px, py):
     #TOP PIPE CHECK
@@ -89,14 +107,34 @@ while running: #game loop-------------------------------------------------------
         i -= 1 #this increments the while loop
     
     #render section-----------------------------------------------
+    ticker+=1
+    if ticker%10==0: #only change frame every 10 ticks
+        frameNum+=1
+    #if we are over the NUMBER of frames in our sprite reset to 0
+    if frameNum>7:
+        frameNum=0
+    
+    
     screen.fill((0, 0, 0))
-    bird.draw()
+    screen.blit(background_image, (0,0))
+    bg_x1 -= 2
+    bg_x2 -= 2
+    
+    if bg_x1 <= -800:
+        bg_x1 = 800
+    if bg_x2 <= -800:
+        bg_x2 = 800
+    screen.blit(background_image, (bg_x1,0))
+    screen.blit(background_image, (bg_x2,0))
+    # bird.draw()
     score_text = font.render("Score:", True, (255, 255, 255))
     screen.blit(score_text, (650, 20)) #position the socre in the top right question
     score_text2 = font.render(str(score), True, (255, 255, 255))
     screen.blit(score_text2, (750, 20)) #position the socre in the top right question
     for pipe in pipes:
         pipe.draw()
+    
+    screen.blit(birdImg, (50, bird.y), (frameWidth*frameNum,0, frameWidth, frameHeight))
     
     pygame.display.flip()
     
@@ -106,7 +144,7 @@ text = font2.render("GAME OVER", True, (255, 50, 50))
 screen.blit(text, (200, 200)) #positipon the socre in the top right corner
 pygame.display.flip()
 pygame.time.delay(2000) #delay in milliseconds
-pygame.quit()
+
 
 pygame.quit()
 
